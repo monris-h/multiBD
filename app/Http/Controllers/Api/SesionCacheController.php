@@ -24,7 +24,7 @@ class SesionCacheController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $sesiones = $this->sesionService->getAll();
+        $sesiones = $this->sesionService->listarTodas();
 
         // Filtrar por usuario
         if ($request->has('usuario_id')) {
@@ -53,13 +53,13 @@ class SesionCacheController extends Controller
                 'datos' => 'nullable|array'
             ]);
 
-            $sesion = $this->sesionService->create(
+            $sesion = $this->sesionService->crear(
                 $validated['usuario_id'],
                 $validated['datos'] ?? []
             );
 
             // Registrar en logs (MongoDB)
-            Log::registrar('crear', 'sesiones', $sesion['id'], null, $sesion);
+            Log::registrar('crear', 'sesiones', $validated['usuario_id'], null, $sesion);
 
             return response()->json([
                 'success' => true,
@@ -82,7 +82,7 @@ class SesionCacheController extends Controller
      */
     public function show($id): JsonResponse
     {
-        $sesion = $this->sesionService->get($id);
+        $sesion = $this->sesionService->obtener($id);
 
         if (!$sesion) {
             return response()->json([
@@ -104,7 +104,7 @@ class SesionCacheController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
-        $sesionActual = $this->sesionService->get($id);
+        $sesionActual = $this->sesionService->obtener($id);
 
         if (!$sesionActual) {
             return response()->json([
@@ -120,7 +120,7 @@ class SesionCacheController extends Controller
             ]);
 
             $datosAnteriores = array_merge(['id' => $id], $sesionActual);
-            $sesion = $this->sesionService->update($id, $validated);
+            $sesion = $this->sesionService->actualizar($id, $validated['datos'] ?? []);
 
             // Registrar en logs (MongoDB)
             Log::registrar('actualizar', 'sesiones', $id, $datosAnteriores, $sesion);
@@ -146,7 +146,7 @@ class SesionCacheController extends Controller
      */
     public function destroy($id): JsonResponse
     {
-        $sesionActual = $this->sesionService->get($id);
+        $sesionActual = $this->sesionService->obtener($id);
 
         if (!$sesionActual) {
             return response()->json([
@@ -156,7 +156,7 @@ class SesionCacheController extends Controller
         }
 
         $datosAnteriores = array_merge(['id' => $id], $sesionActual);
-        $result = $this->sesionService->delete($id);
+        $result = $this->sesionService->eliminar($id);
 
         if ($result) {
             // Registrar en logs (MongoDB)
@@ -180,23 +180,11 @@ class SesionCacheController extends Controller
      */
     public function restore($id): JsonResponse
     {
-        $sesion = $this->sesionService->restore($id);
-
-        if (!$sesion) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sesión no encontrada'
-            ], 404);
-        }
-
-        // Registrar en logs (MongoDB)
-        Log::registrar('actualizar', 'sesiones', $id, null, $sesion);
-
+        // Redis no tiene borrado lógico real, solo eliminación
         return response()->json([
-            'success' => true,
-            'data' => $sesion,
-            'message' => 'Sesión restaurada exitosamente'
-        ]);
+            'success' => false,
+            'message' => 'Las sesiones eliminadas no pueden restaurarse'
+        ], 400);
     }
 
     /**
@@ -205,13 +193,12 @@ class SesionCacheController extends Controller
      */
     public function deleted(): JsonResponse
     {
-        $sesiones = $this->sesionService->getDeleted();
-
+        // Redis no mantiene sesiones eliminadas
         return response()->json([
             'success' => true,
-            'data' => $sesiones,
-            'total' => count($sesiones),
-            'message' => 'Sesiones eliminadas obtenidas exitosamente'
+            'data' => [],
+            'total' => 0,
+            'message' => 'Las sesiones eliminadas no se almacenan'
         ]);
     }
 

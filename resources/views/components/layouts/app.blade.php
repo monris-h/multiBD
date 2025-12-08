@@ -11,11 +11,11 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
 
-    <!-- Styles -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
-    <!-- Tailwind CDN como respaldo -->
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Livewire Styles -->
+    @livewireStyles
     
     <style>
         [x-cloak] { display: none !important; }
@@ -143,5 +143,8 @@
 
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Livewire Scripts -->
+    @livewireScripts
 </body>
 </html>

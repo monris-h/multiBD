@@ -1,210 +1,111 @@
-<?php
+<div class="p-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard - MultiBD</h1>
 
-use Livewire\Volt\Component;
-use App\Models\Categoria;
-use App\Models\Producto;
-use App\Models\Cliente;
-use App\Models\Orden;
-use App\Models\Log;
-use App\Models\Comentario;
-use App\Services\ConfiguracionService;
-use App\Services\SesionCacheService;
+    @if (session()->has('message'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {{ session('message') }}
+        </div>
+    @endif
 
-new class extends Component {
-    public $mysqlStats = [];
-    public $mongoStats = [];
-    public $redisStats = [];
-    public $recentLogs = [];
-
-    public function mount()
-    {
-        $this->loadStats();
-    }
-
-    public function loadStats()
-    {
-        // MySQL Stats
-        $this->mysqlStats = [
-            'categorias' => [
-                'total' => Categoria::count(),
-                'activos' => Categoria::where('activo', true)->count(),
-            ],
-            'productos' => [
-                'total' => Producto::count(),
-                'activos' => Producto::where('activo', true)->count(),
-            ],
-            'clientes' => [
-                'total' => Cliente::count(),
-                'activos' => Cliente::where('activo', true)->count(),
-            ],
-            'ordenes' => [
-                'total' => Orden::count(),
-                'activos' => Orden::where('activo', true)->count(),
-                'pendientes' => Orden::where('estado', 'pendiente')->count(),
-                'completadas' => Orden::where('estado', 'completada')->count(),
-            ],
-        ];
-
-        // MongoDB Stats
-        $this->mongoStats = [
-            'logs' => Log::count(),
-            'comentarios' => Comentario::count(),
-            'comentarios_promedio' => round(Comentario::avg('calificacion') ?? 0, 2),
-        ];
-
-        // Redis Stats
-        $configService = new ConfiguracionService();
-        $sesionService = new SesionCacheService();
-        
-        $this->redisStats = [
-            'configuraciones' => count($configService->listar()),
-            'sesiones' => count($sesionService->listarTodas()),
-        ];
-
-        // Últimos logs
-        $this->recentLogs = Log::orderBy('created_at', 'desc')->take(5)->get();
-    }
-}; ?>
-
-<div>
-    <x-slot name="title">Dashboard - MultiBD</x-slot>
-    
-    <!-- Header -->
+    <!-- MySQL Stats -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">📊 Dashboard</h1>
-        <p class="text-gray-600 mt-2">Vista general del sistema Multi-Base de Datos</p>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- MySQL Card -->
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold">🐬 MySQL</h2>
-                <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Relacional</span>
+        <h2 class="text-xl font-semibold text-blue-600 mb-4">🗄️ MySQL (Relacional)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+                <p class="text-gray-500 text-sm">Categorías</p>
+                <p class="text-3xl font-bold text-gray-800">{{ $mysqlStats['categorias'] }}</p>
+                <a href="/categorias" class="text-blue-500 text-sm hover:underline">Ver todas →</a>
             </div>
-            <div class="space-y-3">
-                <div class="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                    <span>📁 Categorías</span>
-                    <span class="font-bold">{{ $mysqlStats['categorias']['total'] }} ({{ $mysqlStats['categorias']['activos'] }} activos)</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                    <span>📦 Productos</span>
-                    <span class="font-bold">{{ $mysqlStats['productos']['total'] }} ({{ $mysqlStats['productos']['activos'] }} activos)</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                    <span>👥 Clientes</span>
-                    <span class="font-bold">{{ $mysqlStats['clientes']['total'] }} ({{ $mysqlStats['clientes']['activos'] }} activos)</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                    <span>🛒 Órdenes</span>
-                    <span class="font-bold">{{ $mysqlStats['ordenes']['total'] }} ({{ $mysqlStats['ordenes']['pendientes'] }} pend.)</span>
-                </div>
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+                <p class="text-gray-500 text-sm">Productos</p>
+                <p class="text-3xl font-bold text-gray-800">{{ $mysqlStats['productos'] }}</p>
+                <a href="/productos" class="text-blue-500 text-sm hover:underline">Ver todos →</a>
             </div>
-        </div>
-
-        <!-- MongoDB Card -->
-        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold">🍃 MongoDB</h2>
-                <span class="bg-white/20 px-3 py-1 rounded-full text-sm">NoSQL</span>
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+                <p class="text-gray-500 text-sm">Clientes</p>
+                <p class="text-3xl font-bold text-gray-800">{{ $mysqlStats['clientes'] }}</p>
+                <a href="/clientes" class="text-blue-500 text-sm hover:underline">Ver todos →</a>
             </div>
-            <div class="space-y-3">
-                <div class="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                    <span>📋 Logs</span>
-                    <span class="font-bold">{{ $mongoStats['logs'] }}</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                    <span>💬 Comentarios</span>
-                    <span class="font-bold">{{ $mongoStats['comentarios'] }}</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                    <span>⭐ Calificación Promedio</span>
-                    <span class="font-bold">{{ $mongoStats['comentarios_promedio'] }} / 5</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Redis Card -->
-        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold">⚡ Redis</h2>
-                <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Key-Value</span>
-            </div>
-            <div class="space-y-3">
-                <div class="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                    <span>⚙️ Configuraciones</span>
-                    <span class="font-bold">{{ $redisStats['configuraciones'] }}</span>
-                </div>
-                <div class="flex justify-between items-center bg-white/10 rounded-lg p-3">
-                    <span>🔐 Sesiones Activas</span>
-                    <span class="font-bold">{{ $redisStats['sesiones'] }}</span>
-                </div>
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+                <p class="text-gray-500 text-sm">Órdenes</p>
+                <p class="text-3xl font-bold text-gray-800">{{ $mysqlStats['ordenes'] }}</p>
+                <a href="/ordenes" class="text-blue-500 text-sm hover:underline">Ver todas →</a>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activity -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="bg-gray-50 px-6 py-4 border-b">
-            <h2 class="text-xl font-bold text-gray-800">📜 Actividad Reciente</h2>
+    <!-- MongoDB Stats -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-green-600 mb-4">📄 MongoDB (NoSQL)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+                <p class="text-gray-500 text-sm">Logs</p>
+                <p class="text-3xl font-bold text-gray-800">{{ $mongoStats['logs'] }}</p>
+                <a href="/logs" class="text-green-500 text-sm hover:underline">Ver todos →</a>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+                <p class="text-gray-500 text-sm">Comentarios</p>
+                <p class="text-3xl font-bold text-gray-800">{{ $mongoStats['comentarios'] }}</p>
+                <a href="/comentarios" class="text-green-500 text-sm hover:underline">Ver todos →</a>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+                <p class="text-gray-500 text-sm">Calificación Promedio</p>
+                <p class="text-3xl font-bold text-gray-800">{{ number_format($mongoStats['calificacion_promedio'], 1) }} ⭐</p>
+            </div>
         </div>
-        <div class="p-6">
-            @if(count($recentLogs) > 0)
-                <div class="space-y-4">
+    </div>
+
+    <!-- Redis Stats -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-red-600 mb-4">⚡ Redis (Key-Value)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+                <p class="text-gray-500 text-sm">Configuraciones</p>
+                <p class="text-3xl font-bold text-gray-800">{{ $redisStats['configuraciones'] }}</p>
+                <a href="/configuraciones" class="text-red-500 text-sm hover:underline">Ver todas →</a>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+                <p class="text-gray-500 text-sm">Sesiones Activas</p>
+                <p class="text-3xl font-bold text-gray-800">{{ $redisStats['sesiones'] }}</p>
+                <a href="/sesiones" class="text-red-500 text-sm hover:underline">Ver todas →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs Recientes -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Actividad Reciente</h2>
+        @if(count($recentLogs) > 0)
+            <table class="min-w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Acción</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Entidad</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
                     @foreach($recentLogs as $log)
-                        <div class="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
-                            <div class="flex-shrink-0">
-                                @switch($log->accion)
-                                    @case('crear')
-                                        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-600">➕</span>
-                                        @break
-                                    @case('actualizar')
-                                        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600">✏️</span>
-                                        @break
-                                    @case('eliminar')
-                                        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-red-100 text-red-600">🗑️</span>
-                                        @break
-                                    @case('restaurar')
-                                        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 text-yellow-600">♻️</span>
-                                        @break
-                                    @default
-                                        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-600">📝</span>
-                                @endswitch
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-900">{{ ucfirst($log->accion) }} en {{ $log->entidad }}</p>
-                                <p class="text-sm text-gray-500">{{ $log->descripcion }}</p>
-                                <p class="text-xs text-gray-400 mt-1">{{ $log->created_at->timezone('America/Mexico_City')->format('d/m/Y H:i:s') }}</p>
-                            </div>
-                        </div>
+                        <tr>
+                            <td class="px-4 py-2">
+                                <span class="px-2 py-1 text-xs rounded-full 
+                                    @if($log->accion === 'crear') bg-green-100 text-green-800
+                                    @elseif($log->accion === 'actualizar') bg-yellow-100 text-yellow-800
+                                    @elseif($log->accion === 'eliminar') bg-red-100 text-red-800
+                                    @else bg-gray-100 text-gray-800 @endif">
+                                    {{ $log->accion }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-2 text-sm text-gray-600">{{ $log->entidad }}</td>
+                            <td class="px-4 py-2 text-sm text-gray-600">{{ $log->usuario ?? 'Sistema' }}</td>
+                            <td class="px-4 py-2 text-sm text-gray-500">{{ $log->created_at->diffForHumans() }}</td>
+                        </tr>
                     @endforeach
-                </div>
-            @else
-                <div class="text-center py-8 text-gray-500">
-                    <p>No hay actividad reciente</p>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <a href="{{ route('categorias.index') }}" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center">
-            <span class="text-3xl">📁</span>
-            <p class="mt-2 font-medium text-gray-700">Categorías</p>
-        </a>
-        <a href="{{ route('productos.index') }}" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center">
-            <span class="text-3xl">📦</span>
-            <p class="mt-2 font-medium text-gray-700">Productos</p>
-        </a>
-        <a href="{{ route('logs.index') }}" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center">
-            <span class="text-3xl">📋</span>
-            <p class="mt-2 font-medium text-gray-700">Ver Logs</p>
-        </a>
-        <a href="{{ route('configuraciones.index') }}" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center">
-            <span class="text-3xl">⚙️</span>
-            <p class="mt-2 font-medium text-gray-700">Config</p>
-        </a>
+                </tbody>
+            </table>
+        @else
+            <p class="text-gray-500 text-center py-4">No hay actividad reciente</p>
+        @endif
     </div>
 </div>

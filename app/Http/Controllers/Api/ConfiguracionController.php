@@ -24,7 +24,7 @@ class ConfiguracionController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $configuraciones = $this->configuracionService->getAll();
+        $configuraciones = $this->configuracionService->listar();
 
         // Filtrar por tipo si se especifica
         if ($request->has('tipo')) {
@@ -64,7 +64,7 @@ class ConfiguracionController extends Controller
             ]);
 
             // Verificar si ya existe
-            $existing = $this->configuracionService->get($validated['clave']);
+            $existing = $this->configuracionService->obtener($validated['clave']);
             if ($existing) {
                 return response()->json([
                     'success' => false,
@@ -72,11 +72,13 @@ class ConfiguracionController extends Controller
                 ], 422);
             }
 
-            $configuracion = $this->configuracionService->set(
+            $configuracion = $this->configuracionService->crear(
                 $validated['clave'],
-                $validated['valor'],
-                $validated['descripcion'] ?? null,
-                $validated['tipo'] ?? 'string'
+                [
+                    'valor' => $validated['valor'],
+                    'descripcion' => $validated['descripcion'] ?? null,
+                    'tipo' => $validated['tipo'] ?? 'string'
+                ]
             );
 
             // Registrar en logs (MongoDB)
@@ -103,7 +105,7 @@ class ConfiguracionController extends Controller
      */
     public function show($clave): JsonResponse
     {
-        $configuracion = $this->configuracionService->get($clave);
+        $configuracion = $this->configuracionService->obtener($clave);
 
         if (!$configuracion) {
             return response()->json([
@@ -125,7 +127,7 @@ class ConfiguracionController extends Controller
      */
     public function update(Request $request, $clave): JsonResponse
     {
-        $configActual = $this->configuracionService->get($clave);
+        $configActual = $this->configuracionService->obtener($clave);
 
         if (!$configActual) {
             return response()->json([
@@ -142,7 +144,7 @@ class ConfiguracionController extends Controller
             ]);
 
             $datosAnteriores = array_merge(['clave' => $clave], $configActual);
-            $configuracion = $this->configuracionService->update($clave, $validated);
+            $configuracion = $this->configuracionService->actualizar($clave, $validated);
 
             // Registrar en logs (MongoDB)
             Log::registrar('actualizar', 'configuraciones', $clave, $datosAnteriores, $configuracion);
@@ -168,7 +170,7 @@ class ConfiguracionController extends Controller
      */
     public function destroy($clave): JsonResponse
     {
-        $configActual = $this->configuracionService->get($clave);
+        $configActual = $this->configuracionService->obtener($clave);
 
         if (!$configActual) {
             return response()->json([
@@ -178,7 +180,7 @@ class ConfiguracionController extends Controller
         }
 
         $datosAnteriores = array_merge(['clave' => $clave], $configActual);
-        $result = $this->configuracionService->delete($clave);
+        $result = $this->configuracionService->eliminar($clave);
 
         if ($result) {
             // Registrar en logs (MongoDB)
@@ -202,7 +204,7 @@ class ConfiguracionController extends Controller
      */
     public function restore($clave): JsonResponse
     {
-        $configuracion = $this->configuracionService->restore($clave);
+        $configuracion = $this->configuracionService->restaurar($clave);
 
         if (!$configuracion) {
             return response()->json([
@@ -227,7 +229,7 @@ class ConfiguracionController extends Controller
      */
     public function deleted(): JsonResponse
     {
-        $configuraciones = $this->configuracionService->getDeleted();
+        $configuraciones = $this->configuracionService->listarEliminadas();
 
         return response()->json([
             'success' => true,
