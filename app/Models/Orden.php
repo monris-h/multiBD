@@ -55,6 +55,16 @@ class Orden extends Model
     }
 
     /**
+     * Relación con productos (muchos a muchos)
+     */
+    public function productos()
+    {
+        return $this->belongsToMany(Producto::class, 'orden_producto')
+            ->withPivot('cantidad', 'precio_unitario')
+            ->withTimestamps();
+    }
+
+    /**
      * Scope para órdenes activas
      */
     public function scopeActivos($query)
