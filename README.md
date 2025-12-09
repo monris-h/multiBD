@@ -1,21 +1,45 @@
-# MultiBD - Web Service Multi-Base de Datos
+# MultiBD - Sistema Multi-Base de Datos
 
-API RESTful desarrollada con Laravel que implementa conexiones con tres motores de base de datos diferentes:
+API RESTful desarrollada con Laravel 11 que implementa conexiones simultáneas con tres motores de base de datos diferentes, demostrando la integración de múltiples tecnologías de almacenamiento en una sola aplicación.
 
-- **MySQL** (Relacional)
-- **MongoDB** (NoSQL - Documentos)
-- **Redis** (Clave-Valor)
+## Tecnologías Implementadas
 
-## 📋 Requisitos Previos
+| Motor | Tipo | Propósito |
+|-------|------|-----------|
+| MySQL | Relacional | Datos estructurados con relaciones |
+| MongoDB | NoSQL (Documentos) | Datos flexibles y logs |
+| Redis | Clave-Valor | Cache y sesiones en memoria |
+
+---
+
+## Tabla de Contenidos
+
+1. [Requisitos del Sistema](#requisitos-del-sistema)
+2. [Instalación](#instalación)
+3. [Configuración](#configuración)
+4. [Ejecución](#ejecución)
+5. [Estructura de la API](#estructura-de-la-api)
+6. [Endpoints](#endpoints)
+7. [Borrado Lógico](#borrado-lógico)
+8. [Respuestas de la API](#respuestas-de-la-api)
+9. [Pruebas](#pruebas)
+10. [Estructura del Proyecto](#estructura-del-proyecto)
+
+---
+
+## Requisitos del Sistema
 
 - PHP 8.3 o superior
-- Composer
-- WAMP Server (o equivalente con MySQL)
-- MongoDB Server
-- Redis Server
+- Composer 2.x
+- MySQL 8.0 o superior
+- MongoDB 6.0 o superior
+- Redis 7.0 o superior (o Memurai en Windows)
 - Extensión PHP MongoDB (`php_mongodb.dll`)
+- Extensión PHP Redis o cliente Predis
 
-## 🚀 Instalación
+---
+
+## Instalación
 
 ### 1. Clonar el repositorio
 
@@ -24,47 +48,73 @@ git clone <url-del-repositorio>
 cd multiBD
 ```
 
-### 2. Instalar dependencias de PHP
+### 2. Instalar dependencias
 
 ```bash
 composer install
+npm install
 ```
 
-### 3. Configurar el archivo de entorno
-
-Copiar el archivo de ejemplo y configurar las variables:
+### 3. Configurar el entorno
 
 ```bash
 cp .env.example .env
+php artisan key:generate
 ```
 
-Editar `.env` con los siguientes valores:
+### 4. Ejecutar migraciones
+
+```bash
+php artisan migrate
+```
+
+### 5. Compilar assets (opcional)
+
+```bash
+npm run build
+```
+
+---
+
+## Configuración
+
+Editar el archivo `.env` con los siguientes parámetros:
+
+### Aplicación
 
 ```env
-# Configuración de la aplicación
 APP_NAME=MultiBD
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8000
 APP_TIMEZONE=America/Mexico_City
 APP_LOCALE=es
+```
 
-# MySQL (Relacional)
+### MySQL (Base de datos relacional)
+
+```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=multibd
 DB_USERNAME=root
 DB_PASSWORD=
+```
 
-# MongoDB (NoSQL)
+### MongoDB (Base de datos NoSQL)
+
+```env
 MONGODB_HOST=127.0.0.1
 MONGODB_PORT=27017
 MONGODB_DATABASE=multibd_mongo
 MONGODB_USERNAME=
 MONGODB_PASSWORD=
+```
 
-# Redis (Clave-Valor)
+### Redis (Almacenamiento clave-valor)
+
+```env
 REDIS_CLIENT=predis
 REDIS_HOST=127.0.0.1
 REDIS_PASSWORD=null
@@ -72,56 +122,54 @@ REDIS_PORT=6379
 REDIS_DB=0
 ```
 
-### 4. Generar clave de aplicación
+### Instalación de la extensión MongoDB en PHP
 
-```bash
-php artisan key:generate
-```
-
-### 5. Ejecutar migraciones
-
-```bash
-php artisan migrate
-```
-
-### 6. Instalar extensión MongoDB en PHP (si no está instalada)
-
-1. Descargar la DLL desde: https://pecl.php.net/package/mongodb
-2. Seleccionar **PHP 8.3 Thread Safe (TS) x64**
-3. Extraer `php_mongodb.dll` a `C:\wamp64\bin\php\php8.3.x\ext\`
+1. Descargar desde: https://pecl.php.net/package/mongodb
+2. Seleccionar la versión correspondiente a PHP 8.3 Thread Safe (TS) x64
+3. Copiar `php_mongodb.dll` al directorio de extensiones de PHP
 4. Agregar en `php.ini`:
    ```ini
    extension=mongodb
    ```
-5. Reiniciar WAMP Server
+5. Reiniciar el servidor web
 
-### 7. Iniciar los servicios necesarios
+---
 
-- **WAMP Server** (MySQL)
-- **MongoDB**: `mongod`
-- **Redis**: `redis-server`
+## Ejecución
 
-## 🏃 Ejecución
+### Iniciar servicios requeridos
 
-Iniciar el servidor de desarrollo:
+Asegurarse de que los siguientes servicios estén activos:
+
+- MySQL Server
+- MongoDB Server (`mongod`)
+- Redis Server (`redis-server` o Memurai)
+
+### Iniciar el servidor de desarrollo
 
 ```bash
 php artisan serve
 ```
 
-La API estará disponible en: `http://localhost:8000/api`
+La aplicación estará disponible en:
+- **Interfaz Web**: http://localhost:8000
+- **API REST**: http://localhost:8000/api
 
-## 📚 Estructura de la API
+---
 
-### Bases de Datos y Recursos
+## Estructura de la API
 
-| Base de Datos | Tipo | Recursos |
-|---------------|------|----------|
-| MySQL | Relacional | Categorías, Productos, Clientes, Órdenes |
-| MongoDB | NoSQL (Documentos) | Logs, Comentarios |
-| Redis | Clave-Valor | Configuraciones, Sesiones |
+### Recursos por Base de Datos
 
-## 🔗 Endpoints de la API
+| Base de Datos | Recursos | Descripción |
+|---------------|----------|-------------|
+| MySQL | Categorías, Productos, Clientes, Órdenes | Datos transaccionales con relaciones |
+| MongoDB | Logs, Comentarios | Documentos flexibles y auditoría |
+| Redis | Configuraciones, Sesiones | Datos en memoria de acceso rápido |
+
+---
+
+## Endpoints
 
 ### Información General
 
@@ -133,7 +181,7 @@ Retorna información sobre la API y los endpoints disponibles.
 
 ---
 
-### 📦 MySQL - Recursos Relacionales
+### MySQL - Recursos Relacionales
 
 #### Categorías
 
@@ -143,16 +191,15 @@ Retorna información sobre la API y los endpoints disponibles.
 | POST | `/api/categorias` | Crear una categoría |
 | GET | `/api/categorias/{id}` | Obtener una categoría |
 | PATCH | `/api/categorias/{id}` | Actualizar una categoría |
-| DELETE | `/api/categorias/{id}` | Eliminar una categoría (lógico) |
+| DELETE | `/api/categorias/{id}` | Eliminar una categoría (borrado lógico) |
 | PATCH | `/api/categorias/{id}/restaurar` | Restaurar una categoría |
 
-**Ejemplo - Crear Categoría:**
+Ejemplo de creación:
 ```json
 POST /api/categorias
 {
     "nombre": "Electrónicos",
-    "descripcion": "Productos electrónicos y tecnología",
-    "activo": true
+    "descripcion": "Productos electrónicos y tecnología"
 }
 ```
 
@@ -164,10 +211,10 @@ POST /api/categorias
 | POST | `/api/productos` | Crear un producto |
 | GET | `/api/productos/{id}` | Obtener un producto |
 | PATCH | `/api/productos/{id}` | Actualizar un producto |
-| DELETE | `/api/productos/{id}` | Eliminar un producto (lógico) |
+| DELETE | `/api/productos/{id}` | Eliminar un producto (borrado lógico) |
 | PATCH | `/api/productos/{id}/restaurar` | Restaurar un producto |
 
-**Ejemplo - Crear Producto:**
+Ejemplo de creación:
 ```json
 POST /api/productos
 {
@@ -175,18 +222,15 @@ POST /api/productos
     "descripcion": "Laptop HP 15 pulgadas",
     "precio": 15999.99,
     "stock": 10,
-    "sku": "LAP-HP-001",
-    "categoria_id": 1,
-    "activo": true
+    "categoria_id": 1
 }
 ```
 
-**Parámetros de consulta:**
-- `buscar`: Buscar por nombre o SKU
+Parámetros de consulta disponibles:
+- `buscar`: Búsqueda por nombre
 - `categoria_id`: Filtrar por categoría
-- `con_stock`: Solo productos con stock (`true`)
+- `con_stock`: Solo productos con stock disponible
 - `precio_min`, `precio_max`: Rango de precios
-- `ordenar_por`, `orden`: Ordenamiento
 
 #### Clientes
 
@@ -196,21 +240,17 @@ POST /api/productos
 | POST | `/api/clientes` | Crear un cliente |
 | GET | `/api/clientes/{id}` | Obtener un cliente |
 | PATCH | `/api/clientes/{id}` | Actualizar un cliente |
-| DELETE | `/api/clientes/{id}` | Eliminar un cliente (lógico) |
+| DELETE | `/api/clientes/{id}` | Eliminar un cliente (borrado lógico) |
 | PATCH | `/api/clientes/{id}/restaurar` | Restaurar un cliente |
 
-**Ejemplo - Crear Cliente:**
+Ejemplo de creación:
 ```json
 POST /api/clientes
 {
-    "nombre": "Juan",
-    "apellido": "Pérez",
+    "nombre": "Juan Pérez",
     "email": "juan.perez@email.com",
     "telefono": "5551234567",
-    "direccion": "Calle Principal 123",
-    "ciudad": "Ciudad de México",
-    "estado": "CDMX",
-    "codigo_postal": "06600"
+    "direccion": "Calle Principal 123"
 }
 ```
 
@@ -221,29 +261,16 @@ POST /api/clientes
 | GET | `/api/ordenes` | Listar todas las órdenes |
 | GET | `/api/ordenes/estados` | Obtener estados disponibles |
 | POST | `/api/ordenes` | Crear una orden |
-| GET | `/api/ordenes/{id}` | Obtener una orden |
+| GET | `/api/ordenes/{id}` | Obtener una orden con productos |
 | PATCH | `/api/ordenes/{id}` | Actualizar una orden |
-| DELETE | `/api/ordenes/{id}` | Eliminar una orden (lógico) |
+| DELETE | `/api/ordenes/{id}` | Eliminar una orden (borrado lógico) |
 | PATCH | `/api/ordenes/{id}/restaurar` | Restaurar una orden |
 
-**Ejemplo - Crear Orden:**
-```json
-POST /api/ordenes
-{
-    "cliente_id": 1,
-    "subtotal": 15999.99,
-    "impuestos": 2560.00,
-    "total": 18559.99,
-    "estado": "pendiente",
-    "notas": "Envío express"
-}
-```
-
-**Estados disponibles:** `pendiente`, `procesando`, `enviado`, `entregado`, `cancelado`
+Estados disponibles: `pendiente`, `procesando`, `completada`, `cancelada`
 
 ---
 
-### 🍃 MongoDB - Recursos NoSQL
+### MongoDB - Recursos NoSQL
 
 #### Logs
 
@@ -254,22 +281,10 @@ POST /api/ordenes
 | POST | `/api/logs` | Crear un log |
 | GET | `/api/logs/{id}` | Obtener un log |
 | PATCH | `/api/logs/{id}` | Actualizar un log |
-| DELETE | `/api/logs/{id}` | Eliminar un log (lógico) |
+| DELETE | `/api/logs/{id}` | Eliminar un log (borrado lógico) |
 | PATCH | `/api/logs/{id}/restaurar` | Restaurar un log |
 
-**Ejemplo - Crear Log:**
-```json
-POST /api/logs
-{
-    "accion": "crear",
-    "entidad": "productos",
-    "entidad_id": "1",
-    "usuario_id": 1,
-    "datos_nuevos": {"nombre": "Producto X"}
-}
-```
-
-**Acciones disponibles:** `crear`, `actualizar`, `eliminar`, `login`, `logout`
+Acciones disponibles: `crear`, `actualizar`, `eliminar`, `restaurar`
 
 #### Comentarios
 
@@ -280,25 +295,12 @@ POST /api/logs
 | POST | `/api/comentarios` | Crear un comentario |
 | GET | `/api/comentarios/{id}` | Obtener un comentario |
 | PATCH | `/api/comentarios/{id}` | Actualizar un comentario |
-| DELETE | `/api/comentarios/{id}` | Eliminar un comentario (lógico) |
+| DELETE | `/api/comentarios/{id}` | Eliminar un comentario (borrado lógico) |
 | PATCH | `/api/comentarios/{id}/restaurar` | Restaurar un comentario |
-
-**Ejemplo - Crear Comentario:**
-```json
-POST /api/comentarios
-{
-    "contenido": "Excelente producto, muy recomendado",
-    "entidad": "productos",
-    "entidad_id": "1",
-    "usuario_nombre": "Juan Pérez",
-    "calificacion": 5,
-    "metadata": {"verificado": true}
-}
-```
 
 ---
 
-### 🔴 Redis - Recursos Clave-Valor
+### Redis - Recursos Clave-Valor
 
 #### Configuraciones
 
@@ -309,131 +311,171 @@ POST /api/comentarios
 | POST | `/api/configuraciones` | Crear una configuración |
 | GET | `/api/configuraciones/{clave}` | Obtener una configuración |
 | PATCH | `/api/configuraciones/{clave}` | Actualizar una configuración |
-| DELETE | `/api/configuraciones/{clave}` | Eliminar una configuración (lógico) |
+| DELETE | `/api/configuraciones/{clave}` | Eliminar una configuración (borrado lógico) |
 | PATCH | `/api/configuraciones/{clave}/restaurar` | Restaurar una configuración |
 
-**Ejemplo - Crear Configuración:**
-```json
-POST /api/configuraciones
-{
-    "clave": "app_mantenimiento",
-    "valor": false,
-    "descripcion": "Modo de mantenimiento de la aplicación",
-    "tipo": "boolean"
-}
-```
+Tipos de valor disponibles: `string`, `integer`, `boolean`, `json`
 
-**Tipos disponibles:** `string`, `integer`, `boolean`, `json`, `array`
-
-#### Sesiones Cache
+#### Sesiones
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
 | GET | `/api/sesiones` | Listar todas las sesiones |
 | GET | `/api/sesiones/eliminadas` | Listar sesiones eliminadas |
-| GET | `/api/sesiones/usuario/{id}` | Listar sesiones de un usuario |
 | POST | `/api/sesiones` | Crear una sesión |
 | GET | `/api/sesiones/{id}` | Obtener una sesión |
 | PATCH | `/api/sesiones/{id}` | Actualizar una sesión |
-| DELETE | `/api/sesiones/{id}` | Eliminar una sesión (lógico) |
+| DELETE | `/api/sesiones/{id}` | Eliminar una sesión (borrado lógico) |
 | PATCH | `/api/sesiones/{id}/restaurar` | Restaurar una sesión |
-
-**Ejemplo - Crear Sesión:**
-```json
-POST /api/sesiones
-{
-    "usuario_id": 1,
-    "datos": {
-        "carrito": [],
-        "preferencias": {"tema": "oscuro"}
-    }
-}
-```
 
 ---
 
-## 🗑️ Borrado Lógico
+## Borrado Lógico
 
-Todos los recursos implementan **borrado lógico** (soft delete). Esto significa que:
+Todos los recursos implementan **borrado lógico** (soft delete):
 
-- Al eliminar un registro con `DELETE`, no se borra físicamente
-- Se marca con `activo: false` y `deleted_at: timestamp`
-- Los registros eliminados no aparecen en las consultas por defecto
-- Se pueden restaurar usando el endpoint `/restaurar`
-- Para ver registros eliminados, usar `?incluir_inactivos=true`
+- Al ejecutar `DELETE`, el registro no se elimina físicamente de la base de datos
+- Se marca con un campo `deleted_at` con la fecha de eliminación
+- Los registros eliminados no aparecen en las consultas estándar
+- Se pueden restaurar mediante el endpoint `/restaurar`
+- Para incluir registros eliminados en consultas, usar `?incluir_inactivos=true`
 
-## 📄 Respuestas de la API
+---
 
-### Respuesta Exitosa
+## Respuestas de la API
+
+### Estructura de respuesta exitosa
 
 ```json
 {
     "success": true,
-    "data": { ... },
-    "message": "Operación exitosa"
+    "data": { },
+    "message": "Operación completada exitosamente"
 }
 ```
 
-### Respuesta de Error
+### Estructura de respuesta de error
 
 ```json
 {
     "success": false,
-    "message": "Mensaje de error",
-    "errors": { ... }
+    "message": "Descripción del error",
+    "errors": { }
 }
 ```
 
-### Códigos HTTP
+### Códigos de estado HTTP
 
 | Código | Descripción |
 |--------|-------------|
-| 200 | OK - Operación exitosa |
-| 201 | Created - Recurso creado |
+| 200 | OK - Solicitud procesada correctamente |
+| 201 | Created - Recurso creado exitosamente |
 | 404 | Not Found - Recurso no encontrado |
 | 422 | Unprocessable Entity - Error de validación |
-| 500 | Server Error - Error del servidor |
+| 500 | Internal Server Error - Error del servidor |
 
-## 🧪 Probar la API
+---
 
-### Con cURL
+## Pruebas
+
+### Usando cURL
 
 ```bash
 # Listar categorías
 curl -X GET http://localhost:8000/api/categorias
 
-# Crear categoría
+# Crear una categoría
 curl -X POST http://localhost:8000/api/categorias \
   -H "Content-Type: application/json" \
   -d '{"nombre":"Electrónicos","descripcion":"Productos electrónicos"}'
+
+# Obtener una categoría
+curl -X GET http://localhost:8000/api/categorias/1
+
+# Actualizar una categoría
+curl -X PATCH http://localhost:8000/api/categorias/1 \
+  -H "Content-Type: application/json" \
+  -d '{"nombre":"Electrónica"}'
+
+# Eliminar una categoría
+curl -X DELETE http://localhost:8000/api/categorias/1
+
+# Restaurar una categoría
+curl -X PATCH http://localhost:8000/api/categorias/1/restaurar
 ```
 
-### Con Postman
+### Usando Postman
 
 1. Importar la colección de endpoints
-2. Configurar la variable de entorno `base_url` como `http://localhost:8000/api`
+2. Configurar la variable `base_url` como `http://localhost:8000/api`
+3. Ejecutar las solicitudes según sea necesario
 
-## 📁 Estructura del Proyecto
+---
+
+## Estructura del Proyecto
 
 ```
 multiBD/
 ├── app/
-│   ├── Http/Controllers/Api/     # Controladores de la API
-│   ├── Models/                   # Modelos (MySQL y MongoDB)
-│   └── Services/                 # Servicios (Redis)
+│   ├── Http/
+│   │   └── Controllers/
+│   │       └── Api/                 # Controladores de la API REST
+│   ├── Livewire/                    # Componentes Livewire (interfaz web)
+│   ├── Models/                      # Modelos Eloquent (MySQL y MongoDB)
+│   └── Services/                    # Servicios para Redis
 ├── config/
-│   └── database.php              # Configuración de bases de datos
+│   └── database.php                 # Configuración de conexiones
 ├── database/
-│   └── migrations/               # Migraciones de MySQL
+│   └── migrations/                  # Migraciones de MySQL
+├── resources/
+│   └── views/
+│       ├── components/layouts/      # Layouts de la aplicación
+│       └── livewire/                # Vistas de componentes Livewire
 ├── routes/
-│   └── api.php                   # Rutas de la API
-└── .env                          # Variables de entorno
+│   ├── api.php                      # Rutas de la API REST
+│   └── web.php                      # Rutas de la interfaz web
+└── .env                             # Variables de entorno
 ```
 
-## 👨‍💻 Autor
+---
+
+## Interfaz Web
+
+La aplicación incluye una interfaz web desarrollada con Livewire que permite:
+
+- Visualizar estadísticas de todas las bases de datos
+- Gestionar recursos de MySQL (CRUD completo)
+- Consultar logs y comentarios de MongoDB
+- Administrar configuraciones y sesiones de Redis
+- Restaurar registros eliminados
+
+Acceder a la interfaz en: http://localhost:8000
+
+---
+
+## Consideraciones Técnicas
+
+### MySQL
+- Utiliza Eloquent ORM para el mapeo objeto-relacional
+- Implementa SoftDeletes para borrado lógico
+- Relaciones definidas: Categorías -> Productos, Clientes -> Órdenes, Órdenes <-> Productos
+
+### MongoDB
+- Utiliza el paquete `mongodb/laravel-mongodb`
+- Los documentos tienen estructura flexible
+- El campo `_id` es de tipo ObjectId
+
+### Redis
+- Utiliza el cliente Predis
+- Los datos se almacenan como JSON serializado
+- Soporta TTL (tiempo de vida) para sesiones
+
+---
+
+## Autor
 
 Proyecto desarrollado para la materia de Bases de Datos.
 
-## 📝 Licencia
+## Licencia
 
 Este proyecto es de uso académico.
