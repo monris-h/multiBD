@@ -42,7 +42,7 @@
         @forelse($comentarios as $comentario)
             <div class="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition">
                 <div class="flex items-start justify-between mb-3">
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700">{{ $comentario->entidad_tipo }}</span>
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700">{{ $comentario->entidad }}</span>
                     <div class="flex gap-0.5">
                         @for($i = 1; $i <= 5; $i++)
                             <svg class="w-4 h-4 {{ $i <= $comentario->calificacion ? 'text-amber-400' : 'text-slate-200' }}" fill="currentColor" viewBox="0 0 24 24">
@@ -53,8 +53,8 @@
                 </div>
                 <p class="text-slate-700 text-sm mb-4 line-clamp-3">{{ $comentario->contenido }}</p>
                 <div class="text-xs text-slate-500 space-y-1 mb-4">
-                    <p><span class="font-medium text-slate-600">Usuario:</span> {{ $comentario->usuario }}</p>
-                    <p><span class="font-medium text-slate-600">Entidad ID:</span> {{ $comentario->entidad_id }}</p>
+                    <p><span class="font-medium text-slate-600">Usuario:</span> {{ $comentario->usuario_nombre }}</p>
+                    <p><span class="font-medium text-slate-600">Entidad ID:</span> {{ $comentario->entidad_id }}
                     <p><span class="font-medium text-slate-600">Fecha:</span> {{ $comentario->created_at->format('d/m/Y H:i') }}</p>
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
@@ -90,14 +90,14 @@
             <form wire:submit="save" class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">Tipo de entidad</label>
-                    <select wire:model="entidad_tipo" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
+                    <select wire:model="entidad" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
                         <option value="">Seleccionar...</option>
                         <option value="producto">Producto</option>
                         <option value="categoria">Categoría</option>
                         <option value="cliente">Cliente</option>
                         <option value="orden">Orden</option>
                     </select>
-                    @error('entidad_tipo') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    @error('entidad') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">ID de entidad</label>
@@ -106,8 +106,8 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">Usuario</label>
-                    <input wire:model="usuario" type="text" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
-                    @error('usuario') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    <input wire:model="usuario_nombre" type="text" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition">
+                    @error('usuario_nombre') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">Contenido</label>
@@ -153,7 +153,7 @@
                             <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                                 <div class="min-w-0 flex-1">
                                     <p class="text-sm text-slate-900 truncate">{{ Str::limit($item->contenido, 60) }}</p>
-                                    <p class="text-xs text-slate-500 mt-1">{{ $item->usuario }} · {{ $item->entidad_tipo }}</p>
+                                    <p class="text-xs text-slate-500 mt-1">{{ $item->usuario_nombre }} · {{ $item->entidad }}</p>
                                 </div>
                                 <div class="flex gap-2 ml-4">
                                     <button wire:click="restore('{{ $item->_id }}')" class="px-3 py-1.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition">

@@ -1,6 +1,6 @@
 # MultiBD - Sistema Multi-Base de Datos
 
-API RESTful desarrollada con Laravel 11 que implementa conexiones simultáneas con tres motores de base de datos diferentes, demostrando la integración de múltiples tecnologías de almacenamiento en una sola aplicación.
+API RESTful desarrollada con Laravel 12 que implementa conexiones simultáneas con tres motores de base de datos diferentes.
 
 ## Tecnologías Implementadas
 

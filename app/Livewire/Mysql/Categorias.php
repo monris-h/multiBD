@@ -41,6 +41,11 @@ class Categorias extends Component
         $this->showModal = true;
     }
 
+    public function edit($id)
+    {
+        $this->openModal($id);
+    }
+
     public function closeModal()
     {
         $this->showModal = false;
@@ -93,6 +98,16 @@ class Categorias extends Component
         $this->showDeletedModal = true;
     }
 
+    public function openDeletedModal()
+    {
+        $this->showDeleted();
+    }
+
+    public function closeDeletedModal()
+    {
+        $this->showDeletedModal = false;
+    }
+
     public function restore($id)
     {
         $categoria = Categoria::onlyTrashed()->find($id);
@@ -103,6 +118,19 @@ class Categorias extends Component
             
             Log::registrar('restaurar', 'Categoria', $id, "Categoría restaurada: {$categoria->nombre}");
             session()->flash('message', 'Categoría restaurada correctamente');
+            $this->showDeleted();
+        }
+    }
+
+    public function forceDelete($id)
+    {
+        $categoria = Categoria::onlyTrashed()->find($id);
+        if ($categoria) {
+            $nombre = $categoria->nombre;
+            $categoria->forceDelete();
+            
+            Log::registrar('eliminar_permanente', 'Categoria', $id, "Categoría eliminada permanentemente: {$nombre}");
+            session()->flash('message', 'Categoría eliminada permanentemente');
             $this->showDeleted();
         }
     }

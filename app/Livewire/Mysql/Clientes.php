@@ -11,6 +11,7 @@ class Clientes extends Component
     use WithPagination;
 
     public $nombre = '';
+    public $apellido = '';
     public $email = '';
     public $telefono = '';
     public $direccion = '';
@@ -22,6 +23,7 @@ class Clientes extends Component
 
     protected $rules = [
         'nombre' => 'required|min:2|max:255',
+        'apellido' => 'required|min:2|max:255',
         'email' => 'required|email|max:255',
         'telefono' => 'nullable|max:20',
         'direccion' => 'nullable|max:500',
@@ -34,7 +36,7 @@ class Clientes extends Component
 
     public function openModal()
     {
-        $this->reset(['nombre', 'email', 'telefono', 'direccion', 'editId']);
+        $this->reset(['nombre', 'apellido', 'email', 'telefono', 'direccion', 'editId']);
         $this->showModal = true;
     }
 
@@ -49,6 +51,7 @@ class Clientes extends Component
         $cliente = Cliente::findOrFail($id);
         $this->editId = $id;
         $this->nombre = $cliente->nombre;
+        $this->apellido = $cliente->apellido;
         $this->email = $cliente->email;
         $this->telefono = $cliente->telefono;
         $this->direccion = $cliente->direccion;
@@ -69,6 +72,7 @@ class Clientes extends Component
             $cliente = Cliente::findOrFail($this->editId);
             $cliente->update([
                 'nombre' => $this->nombre,
+                'apellido' => $this->apellido,
                 'email' => $this->email,
                 'telefono' => $this->telefono,
                 'direccion' => $this->direccion,
@@ -77,6 +81,7 @@ class Clientes extends Component
         } else {
             Cliente::create([
                 'nombre' => $this->nombre,
+                'apellido' => $this->apellido,
                 'email' => $this->email,
                 'telefono' => $this->telefono,
                 'direccion' => $this->direccion,

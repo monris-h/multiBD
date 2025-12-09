@@ -70,13 +70,20 @@ class Configuraciones extends Component
             $valorFinal = json_decode($this->valor, true) ?? $this->valor;
         }
 
-        $this->configuracionService->crearOActualizar($this->clave, [
+        $datos = [
             'valor' => $valorFinal,
             'descripcion' => $this->descripcion,
             'tipo' => $this->tipo,
-        ]);
+        ];
 
-        session()->flash('message', $this->editKey ? 'Configuración actualizada correctamente.' : 'Configuración creada correctamente.');
+        if ($this->editKey) {
+            $this->configuracionService->actualizar($this->clave, $datos);
+            session()->flash('message', 'Configuración actualizada correctamente.');
+        } else {
+            $this->configuracionService->crear($this->clave, $datos);
+            session()->flash('message', 'Configuración creada correctamente.');
+        }
+
         $this->closeModal();
     }
 
@@ -88,8 +95,13 @@ class Configuraciones extends Component
 
     public function openDeletedModal()
     {
-        $todas = $this->configuracionService->listar();
-        $this->deletedItems = array_filter($todas, fn($item) => isset($item['eliminado']) && $item['eliminado'] === true);
+        $lista = $this->configuracionService->listarEliminadas();
+        $this->deletedItems = [];
+        foreach ($lista as $item) {
+            $clave = $item['clave'];
+            unset($item['clave']);
+            $this->deletedItems[$clave] = $item;
+        }
         $this->showDeletedModal = true;
     }
 
@@ -101,15 +113,27 @@ class Configuraciones extends Component
     public function restore($clave)
     {
         $this->configuracionService->restaurar($clave);
-        $todas = $this->configuracionService->listar();
-        $this->deletedItems = array_filter($todas, fn($item) => isset($item['eliminado']) && $item['eliminado'] === true);
+        $lista = $this->configuracionService->listarEliminadas();
+        $this->deletedItems = [];
+        foreach ($lista as $item) {
+            $claveItem = $item['clave'];
+            unset($item['clave']);
+            $this->deletedItems[$claveItem] = $item;
+        }
         session()->flash('message', 'Configuración restaurada correctamente.');
     }
 
     public function render()
     {
-        $todas = $this->configuracionService->listar();
-        $configuraciones = array_filter($todas, fn($item) => !isset($item['eliminado']) || $item['eliminado'] !== true);
+        $lista = $this->configuracionService->listar();
+        
+        // Transformar array indexado a asociativo usando 'clave' como key
+        $configuraciones = [];
+        foreach ($lista as $item) {
+            $clave = $item['clave'];
+            unset($item['clave']);
+            $configuraciones[$clave] = $item;
+        }
 
         if ($this->search) {
             $configuraciones = array_filter($configuraciones, function ($item, $key) {

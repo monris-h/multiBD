@@ -111,12 +111,11 @@ class Ordenes extends Component
         foreach ($this->productos_seleccionados as $productoId) {
             $producto = Producto::find($productoId);
             $cantidad = $this->cantidades[$productoId] ?? 1;
-            $subtotal = $producto->precio * $cantidad;
-            $total += $subtotal;
+            $subtotalProducto = $producto->precio * $cantidad;
+            $total += $subtotalProducto;
             $productosData[$productoId] = [
                 'cantidad' => $cantidad,
                 'precio_unitario' => $producto->precio,
-                'subtotal' => $subtotal,
             ];
         }
 
@@ -125,6 +124,7 @@ class Ordenes extends Component
             $orden->update([
                 'cliente_id' => $this->cliente_id,
                 'estado' => $this->estado,
+                'subtotal' => $total,
                 'total' => $total,
                 'notas' => $this->notas,
             ]);
@@ -132,8 +132,10 @@ class Ordenes extends Component
             session()->flash('message', 'Orden actualizada correctamente.');
         } else {
             $orden = Orden::create([
+                'numero_orden' => 'ORD-' . strtoupper(uniqid()),
                 'cliente_id' => $this->cliente_id,
                 'estado' => $this->estado,
+                'subtotal' => $total,
                 'total' => $total,
                 'notas' => $this->notas,
             ]);
