@@ -12,21 +12,6 @@ API RESTful desarrollada con Laravel 12 que implementa conexiones simultáneas c
 
 ---
 
-## Tabla de Contenidos
-
-1. [Requisitos del Sistema](#requisitos-del-sistema)
-2. [Instalación](#instalación)
-3. [Configuración](#configuración)
-4. [Ejecución](#ejecución)
-5. [Estructura de la API](#estructura-de-la-api)
-6. [Endpoints](#endpoints)
-7. [Borrado Lógico](#borrado-lógico)
-8. [Respuestas de la API](#respuestas-de-la-api)
-9. [Pruebas](#pruebas)
-10. [Estructura del Proyecto](#estructura-del-proyecto)
-
----
-
 ## Requisitos del Sistema
 
 - PHP 8.3 o superior
